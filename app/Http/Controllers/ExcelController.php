@@ -21,23 +21,21 @@ class ExcelController extends Controller
 
         // Set headers
         $sheet->setCellValue('A1', 'Day');
-        $sheet->setCellValue('B1', 'Minimum Temperature');
-        $sheet->setCellValue('C1', 'Average Wind Speed');
-        $sheet->setCellValue('D1', 'Top Precipitation');
-        $sheet->setCellValue('E1', 'Avg H2O per kg of Air');
+        $sheet->setCellValue('B1', 'Temperature');
+        $sheet->setCellValue('C1', 'Wind Speed');
+        $sheet->setCellValue('D1', 'Precipitation');
+        $sheet->setCellValue('E1', 'Humidity');
 
         $dates = Date::all();
-        $weatherData = WeatherData::all();
 
         // Populate data
         $row = 2;
         foreach ($dates as $date) {
             $sheet->setCellValue('A' . $row, $date->date);
-            $sheet->setCellValue('B' . $row, $this->getMinimumTemperature($weatherData, $date->date));
-            $sheet->setCellValue('C' . $row, $this->getAverageWindSpeed($weatherData, $date->date));
-            $sheet->setCellValue('D' . $row, $this->getTopPrecipitation($weatherData, $date->date));
-            // Calculate and set the average grams of H2O per kg of air
-            $sheet->setCellValue('E' . $row, $this->calculateAverageH2O($weatherData, $date->date));
+            $sheet->setCellValue('B' . $row, $this->getTemperature( $date->date));
+            $sheet->setCellValue('C' . $row, $this->getAverageWindSpeed( $date->date));
+            $sheet->setCellValue('D' . $row, $this->getPrecipitation( $date->date));
+            $sheet->setCellValue('E' . $row, $this->getHumidity( $date->date));
             $row++;
         }
 
@@ -56,71 +54,62 @@ class ExcelController extends Controller
         return $response;
     }
 
-// Helper function to get minimum temperature for a specific date
-    private function getMinimumTemperature($weatherData, $date)
+    private function getTemperature($date)
     {
         $dateEntry = Date::where('date', $date)->first();
         if (!$dateEntry) {
-            return 0; // Handle the case when the date is not found
+            return 0;
         }
 
         $weatherDataEntry = WeatherData::find($dateEntry->data_id);
         if (!$weatherDataEntry) {
-            return 0; // Handle the case when weather data is not found
+            return 0;
         }
 
         return $weatherDataEntry->temperature_celsius;
     }
 
-// Helper function to get average wind speed for a specific date
-    private function getAverageWindSpeed($weatherData, $date)
+    private function getAverageWindSpeed( $date)
     {
         $dateEntry = Date::where('date', $date)->first();
         if (!$dateEntry) {
-            return 0; // Handle the case when the date is not found
+            return 0;
         }
 
         $weatherDataEntry = WeatherData::find($dateEntry->data_id);
         if (!$weatherDataEntry) {
-            return 0; // Handle the case when weather data is not found
+            return 0;
         }
 
         return $weatherDataEntry->wind_speed;
     }
 
-// Helper function to get top precipitation for a specific date
-    private function getTopPrecipitation($weatherData, $date)
+    private function getPrecipitation( $date)
     {
         $dateEntry = Date::where('date', $date)->first();
         if (!$dateEntry) {
-            return 0; // Handle the case when the date is not found
+            return 0;
         }
 
         $weatherDataEntry = WeatherData::find($dateEntry->data_id);
         if (!$weatherDataEntry) {
-            return 0; // Handle the case when weather data is not found
+            return 0;
         }
 
         return $weatherDataEntry->precipitation_millimeter;
     }
-
-// Helper function to calculate average grams of H2O per kg of air for a specific date
-    private function calculateAverageH2O($weatherData, $date)
+    private function getHumidity( $date)
     {
         $dateEntry = Date::where('date', $date)->first();
         if (!$dateEntry) {
-            return 0; // Handle the case when the date is not found
+            return 0;
         }
 
         $weatherDataEntry = WeatherData::find($dateEntry->data_id);
         if (!$weatherDataEntry) {
-            return 0; // Handle the case when weather data is not found
+            return 0;
         }
-
-        // Implement your calculation for average grams of H2O per kg of air
-        // Example: Calculate it based on the humidity and other factors
         $humidity = $weatherDataEntry->humidity_percent;
-        // Implement your calculation logic here
         return $humidity;
     }
 
